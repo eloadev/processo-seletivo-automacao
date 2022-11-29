@@ -20,36 +20,41 @@ class AvaliaPrecos:
         for x in range(len(skus)):
             skus[x].append(media_precos)
 
-    def acessa_loja(self, produto):
+    def acessa_loja(self, produtos):
         driver = webdriver.Chrome()
         driver.get("https://www.americanas.com.br/")
-        elemento = driver.find_element(By.XPATH,
-                                       """//*[@id="rsyswpsdk"]/div/header/div[1]/div[1]/div/div[1]/form/input""")
-        pesquisa = driver.find_element(By.XPATH,
-                                       """//*[@id="rsyswpsdk"]/div/header/div[1]/div[1]/div/div[1]/form/button""")
-        elemento.send_keys(produto)
-        driver.execute_script("arguments[0].click()", pesquisa)
-        sleep(5)
+        teste = []
+        for x in range(len(produtos)):
+            elemento = driver.find_element(By.XPATH,
+                                           """//*[@id="rsyswpsdk"]/div/header/div[1]/div[1]/div/div[1]/form/input""")
+            pesquisa = driver.find_element(By.XPATH,
+                                           """//*[@id="rsyswpsdk"]/div/header/div[1]/div[1]/div/div[1]/form/button""")
+            elemento.clear()
+            elemento.send_keys(produtos[x])
+            driver.execute_script("arguments[0].click()", pesquisa)
+            sleep(5)
 
-        skus = []
-        i = 1
+            skus = []
+            i = 1
 
-        while i <= 5:
-            sku = []
-            nome_produto = driver.find_element(By.XPATH,
-                                               """//*[@id="rsyswpsdk"]/div/main/div/div[3]/div[2]/div[{}]/div/div/a/div[2]/div[2]/h3""".format(i))
-            valor_produto = driver.find_element(By.XPATH,
-                                                """//*[@id="rsyswpsdk"]/div/main/div/div[3]/div[2]/div[{}]/div/div/a/div[3]/span[1]""".format(i))
-            sku.append(nome_produto.text)
-            sku.append(valor_produto.text)
-            skus.append(sku)
-            i += 1
+            while i <= 5:
+                sku = []
+                nome_produto = driver.find_element(By.XPATH,
+                                                   """//*[@id="rsyswpsdk"]/div/main/div/div[3]/div[2]/div[{}]/div/div/a/div[2]/div[2]/h3""".format(i))
+                valor_produto = driver.find_element(By.XPATH,
+                                                    """//*[@id="rsyswpsdk"]/div/main/div/div[3]/div[2]/div[{}]/div/div/a/div[3]/span[1]""".format(i))
+                sku.append(nome_produto.text)
+                sku.append(valor_produto.text)
+                skus.append(sku)
+                i += 1
 
-        log = open("log.txt", 'a')
-        log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') + " - Pesquisado SKUs do produto {}\n".format(produto))
+            log = open("log.txt", 'a')
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                      " - Pesquisado SKUs do produto {}\n".format(produtos[x]))
 
-        self.media_entre_valores(skus)
-        return skus
+            self.media_entre_valores(skus)
+            teste.append(skus)
+        return teste
 
     def gerador_relatorio_excel(self, produtos):
         workbook = Workbook()
@@ -63,14 +68,16 @@ class AvaliaPrecos:
         sheet['C1'].font = Font(bold=True)
         sheet['D1'].font = Font(bold=True)
 
+        resultado = self.acessa_loja(produtos)
+
         row = 2
-        for x in range(len(produtos)):
-            resultado = self.acessa_loja(produtos[x])
-            for y in range(len(resultado)):
+        for x in range(len(resultado)):
+            produto = resultado[x]
+            for y in range(len(produto)):
                 sheet["A{}".format(row)] = produtos[x]
-                sheet["B{}".format(row)] = resultado[y][0]
-                sheet["C{}".format(row)] = resultado[y][1]
-                sheet["D{}".format(row)] = resultado[y][2]
+                sheet["B{}".format(row)] = produto[y][0]
+                sheet["C{}".format(row)] = produto[y][1]
+                sheet["D{}".format(row)] = produto[y][2]
                 row += 1
 
         workbook.save("Relatório Produtos.xlsx")

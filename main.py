@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from avaliaprecos import AvaliaPrecos
 import pandas
+import configparser
 
 
 def get_valores_excel(excel_sheet):
@@ -17,43 +18,48 @@ def get_valores_excel(excel_sheet):
     return lista_produtos
 
 
-def envia_email(send_from, send_to, subject, text, senha):
-    mensagem = MIMEMultipart()
-    mensagem['From'] = send_from
-    mensagem['To'] = send_to
-    mensagem['Subject'] = subject
-    mensagem.attach(MIMEText(text))
+def envia_email(send_from, send_to, subject, text, password):
+    message = MIMEMultipart()
+    message['From'] = send_from
+    message['To'] = send_to
+    message['Subject'] = subject
+    message.attach(MIMEText(text))
 
     part = MIMEBase('application', "octet-stream")
     part.set_payload(open("relatorio.xlsx", "rb").read())
     encoders.encode_base64(part)
     part.add_header('Content-Disposition', 'attachment; filename="relatorio.xlsx"')
-    mensagem.attach(part)
+    message.attach(part)
     try:
         smtp = smtplib.SMTP('smtp.gmail.com', 587)
         smtp.starttls()
-        smtp.login(send_from, senha)
-        smtp.sendmail(send_from, send_to, mensagem.as_string())
+        smtp.login(send_from, password)
+        smtp.sendmail(send_from, send_to, message.as_string())
+        log = open("log.txt", 'a')
+        log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                  " - Email enviado com sucesso!\n")
+        smtp.quit()
     except Exception:
         log = open("log.txt", 'a')
         log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
-                  "Erro {} ao enviar e-mail!".format(sys.exc_info()[0]))
-    finally:
-        log = open("log.txt", 'a')
-        log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
-                  " - Email enviado com sucesso!")
-    smtp.quit()
+                  "Erro {} ao enviar e-mail! \n".format(sys.exc_info()[0]))
+        return
 
 
-excel = "Exemplo.xlsx"
-produtos = get_valores_excel(excel)
-avaliaprecos = AvaliaPrecos()
-avaliaprecos.gerador_relatorio_excel(produtos)
+# excel = "Exemplo.xlsx"
+# products = get_valores_excel(excel)
+# avaliaprecos = AvaliaPrecos()
+# avaliaprecos.gerador_relatorio_excel(products)
 
-send_from = "elofakes@gmail.com"
-send_to = "eloamello126@gmail.com"
-subject = "Relatório"
-text = "Relatório em anexo"
-senha = "jsrbsgfxwhgcbsfu"
+config = configparser.ConfigParser()
+config.sections()
+config.read('email.ini')
+config.sections()
 
-envia_email(send_from, send_to, subject, text, senha)
+send_from = config['DEFAUT'].get('send_from')
+send_to = config['DEFAUT'].get('send_to')
+subject = config['DEFAUT'].get('subject')
+text = config['DEFAUT'].get('text')
+password = config['DEFAUT'].get('password')
+
+envia_email(send_from, send_to, subject, text, password)

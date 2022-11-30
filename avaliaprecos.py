@@ -8,22 +8,31 @@ from selenium.webdriver.common.by import By
 
 
 class AvaliaPrecos:
-    @staticmethod
-    def media_entre_valores(skus):
+    def extrai_preco_como_float(self, preco_string):
+        return float(preco_string.replace('R$ ', '').replace('.', '').replace(',', '.'))
+
+    def media_entre_valores(self, skus):
         media_precos = 0
 
         for x in range(len(skus)):
-            refatorado = skus[x][1].replace('R$ ', '')
-            refatorado = refatorado.replace('.', '')
-            refatorado = refatorado.replace(',', '.')
-            media_precos += float(refatorado)
+            media_precos += self.extrai_preco_como_float(skus[x][1])
 
         for x in range(len(skus)):
             skus[x].append(media_precos)
 
     def acessa_loja(self, produtos):
         driver = webdriver.Chrome()
-        driver.get("https://www.americanas.com.br/")
+        try:
+            driver.get("https://www.americanas.com.br/")
+            log = open("log.txt", 'a')
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                      " - Conexao com o site feita com Sucesso!\n")
+        except Exception:
+            log = open("log.txt", 'a')
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                      " - Erro {} ao tentar acessar o site!\n".format(sys.exc_info()[0]))
+            return
+
         lista_todos_produtos = []
         for x in range(len(produtos)):
             elemento = driver.find_element(By.XPATH,
@@ -37,7 +46,6 @@ class AvaliaPrecos:
 
             skus = []
             i = 1
-
             while i <= 5:
                 sku = []
                 nome_produto = driver.find_element(By.XPATH,
@@ -48,10 +56,6 @@ class AvaliaPrecos:
                 sku.append(valor_produto.text)
                 skus.append(sku)
                 i += 1
-
-            log = open("log.txt", 'a')
-            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
-                      " - Pesquisado SKUs do produto {}\n".format(produtos[x]))
 
             self.media_entre_valores(skus)
             lista_todos_produtos.append(skus)
@@ -69,11 +73,11 @@ class AvaliaPrecos:
         sheet['C1'].font = Font(bold=True)
         sheet['D1'].font = Font(bold=True)
 
-        resultado = self.acessa_loja(produtos)
+        query_results = self.acessa_loja(produtos)
 
         row = 2
-        for x in range(len(resultado)):
-            produto = resultado[x]
+        for x in range(len(query_results)):
+            produto = query_results[x]
             for y in range(len(produto)):
                 sheet["A{}".format(row)] = produtos[x]
                 sheet["B{}".format(row)] = produto[y][0]
@@ -83,10 +87,11 @@ class AvaliaPrecos:
 
         try:
             workbook.save("relatorio.xlsx")
-        except Exception():
             log = open("log.txt", 'a')
             log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
-                      " - Erro {} ao salvar relatório!".format(sys.exc_info()[0]))
-        finally:
+                      " - Criado relatorio final com sucesso!\n")
+        except TypeError():
             log = open("log.txt", 'a')
-            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') + " - Criado relatorio final com sucesso!\n")
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                      " - Erro {} ao salvar relatório!\n".format(sys.exc_info()[0]))
+            return

@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 from time import sleep
 from openpyxl.styles import Font
@@ -23,7 +24,7 @@ class AvaliaPrecos:
     def acessa_loja(self, produtos):
         driver = webdriver.Chrome()
         driver.get("https://www.americanas.com.br/")
-        teste = []
+        lista_todos_produtos = []
         for x in range(len(produtos)):
             elemento = driver.find_element(By.XPATH,
                                            """//*[@id="rsyswpsdk"]/div/header/div[1]/div[1]/div/div[1]/form/input""")
@@ -53,8 +54,8 @@ class AvaliaPrecos:
                       " - Pesquisado SKUs do produto {}\n".format(produtos[x]))
 
             self.media_entre_valores(skus)
-            teste.append(skus)
-        return teste
+            lista_todos_produtos.append(skus)
+        return lista_todos_produtos
 
     def gerador_relatorio_excel(self, produtos):
         workbook = Workbook()
@@ -80,7 +81,12 @@ class AvaliaPrecos:
                 sheet["D{}".format(row)] = produto[y][2]
                 row += 1
 
-        workbook.save("Relatório Produtos.xlsx")
-
-        log = open("log.txt", 'a')
-        log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') + " - Criado relatorio final\n")
+        try:
+            workbook.save("relatorio.xlsx")
+        except Exception():
+            log = open("log.txt", 'a')
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') +
+                      " - Erro {} ao salvar relatório!".format(sys.exc_info()[0]))
+        finally:
+            log = open("log.txt", 'a')
+            log.write(datetime.now().strftime('%d/%m/%y %H:%M:%S') + " - Criado relatorio final com sucesso!\n")

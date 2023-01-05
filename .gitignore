@@ -1,0 +1,9 @@
+# Virtual env
+/venv/
+
+#
+/email.ini
+
+# pycharm
+.idea
+__pycache__

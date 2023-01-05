@@ -12,10 +12,12 @@ class AvaliaPrecos:
         return float(preco_string.replace('R$ ', '').replace('.', '').replace(',', '.'))
 
     def media_entre_valores(self, skus):
-        media_precos = 0
+        total_precos = 0
 
         for x in range(len(skus)):
-            media_precos += self.extrai_preco_como_float(skus[x][1])
+            total_precos += self.extrai_preco_como_float(skus[x][1])
+
+        media_precos = total_precos / 5
 
         for x in range(len(skus)):
             skus[x].append(media_precos)

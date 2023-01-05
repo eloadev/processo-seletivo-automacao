@@ -30,6 +30,7 @@ def envia_email(send_from, send_to, subject, text, password):
     encoders.encode_base64(part)
     part.add_header('Content-Disposition', 'attachment; filename="relatorio.xlsx"')
     message.attach(part)
+
     try:
         smtp = smtplib.SMTP('smtp.gmail.com', 587)
         smtp.starttls()
@@ -52,14 +53,12 @@ avaliaprecos = AvaliaPrecos()
 avaliaprecos.gerador_relatorio_excel(products)
 
 config = configparser.ConfigParser()
-config.sections()
 config.read('email.ini')
-config.sections()
 
-send_from = config['DEFAUT'].get('send_from')
-send_to = config['DEFAUT'].get('send_to')
-subject = config['DEFAUT'].get('subject')
-text = config['DEFAUT'].get('text')
-password = config['DEFAUT'].get('password')
+send_from = config['DEFAULT'].get('send_from')
+send_to = config['DEFAULT'].get('send_to')
+subject = config['DEFAULT'].get('subject')
+text = config['DEFAULT'].get('text')
+password = config['DEFAULT'].get('password')
 
 envia_email(send_from, send_to, subject, text, password)

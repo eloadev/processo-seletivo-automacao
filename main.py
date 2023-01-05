@@ -46,10 +46,10 @@ def envia_email(send_from, send_to, subject, text, password):
         return
 
 
-# excel = "Exemplo.xlsx"
-# products = get_valores_excel(excel)
-# avaliaprecos = AvaliaPrecos()
-# avaliaprecos.gerador_relatorio_excel(products)
+excel = "Exemplo.xlsx"
+products = get_valores_excel(excel)
+avaliaprecos = AvaliaPrecos()
+avaliaprecos.gerador_relatorio_excel(products)
 
 config = configparser.ConfigParser()
 config.sections()

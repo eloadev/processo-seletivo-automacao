@@ -9,12 +9,10 @@ A automação recebe uma lista em excel com nomes de produtos e envia por e-mail
 No terminal, navegue até o diretório do projeto.
 
 Instale as dependências necessárias que estão no arquivo “requirements.txt” através da linha de comando: 
-
-	pip install –r requirements.txt 
+```pip install –r requirements.txt```
 
 Também no terminal, execute o arquivo “main.py” através da linha de comando: 
-
-    python3 main.py
+```python3 main.py``` ou ```python main.py```
 
 Um e-mail será enviado ao endereço especificado no arquivo "email.ini" com o assunto “Relatório de Avaliação de Preços” e em anexo a planilha de Excel gerada no projeto. Um log também será gerado e implementado em cada execução do projeto.
 
